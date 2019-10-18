@@ -1,6 +1,8 @@
 const DEBUG = process.env.DEBUG ? process.env.DEBUG==='YES' : true
 const mysql = require('mysql')
+const dateRange = require('./daterange')
 const maxRetries = 60
+const messages = {start: "ACCStart", stop: "ACCStop"}
 let pool = null
 let propertyToFieldMap = null
 
@@ -24,15 +26,36 @@ const get = {
                         if(DEBUG) console.log("Database connection error: ", err.code);
                         reject(err)
                     }
-                    const sql = `SELECT * FROM data WHERE unit_id LIKE '%${unitId}' AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
+                    const sql = `SELECT * FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc ASC LIMIT 1`
                     result = await query(connection,sql)
                     const json = JSON.stringify(result)
                     resolve(JSON.parse(json))
                 })
             }
-        } )
-
-        
+        } );
+    },
+    message: (unitId,message,startDateString=null,endDateString=null) => {
+        let {startDate,endDate} = dateRange(startDateString,endDateString)
+        return new Promise( (resolve,reject) => {
+            if(pool){
+                let result = null
+                pool.getConnection( async (err, connection) => {
+                    if(err){
+                        if(DEBUG) console.log("Database connection error: ", err.code);
+                        reject(err)
+                    }
+                    const sql = `SELECT utc,message FROM data WHERE utc BETWEEN ${connection.escape(startDate)} AND ${connection.escape(endDate)} AND unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' AND message=${connection.escape(message)} ORDER BY utc DESC`
+                    try{
+                        result = await query(connection,sql)
+                    }catch(err){
+                        throw err
+                    }
+                    
+                    const json = JSON.stringify(result)
+                    resolve(JSON.parse(json))
+                })
+            }
+        } );
     }
 }
 
@@ -149,3 +172,4 @@ module.exports.connect = connect
 module.exports.disconnect = disconnect
 module.exports.write = (record,model) => write([record],model,0)
 module.exports.get = get
+module.exports.messages = messages

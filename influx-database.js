@@ -1,5 +1,7 @@
 const DEBUG = process.env.DEBUG ? process.env.DEBUG==='YES' : true
 const Influx = require('influx')
+const escape = require('influx').escape
+const dateRange = require('./daterange')
 let connection = null
 let tachometerTick = 30
 
@@ -48,24 +50,32 @@ const connect = (config,dataInterval=30) => {
     )
 }
 
-const getUnits = async () => {
-    
-    const result = await connection.query("show tag values from speed with key=unit")
+const get = {
+    units: async () => {
+        const result = await connection.query("show tag values from speed with key=unit")
+        const units = []
 
-    const units = []
-
-    for( key in result ){
-        if(result[key].value){
-            const startChar = result[key].value.indexOf(":")
-            const unit = result[key].value.substring(startChar+1)
-            if( unit !== 'undefined' && result[key].key === "unit" ){
-                
-                units.push({id: unit})
+        for( key in result ){
+            if(result[key].value){
+                const startChar = result[key].value.indexOf(":")
+                const unit = result[key].value.substring(startChar+1)
+                if( unit !== 'undefined' && result[key].key === "unit" ){
+                    units.push({id: unit})
+                }
             }
-        }
-    }    
-    return units;
-    
+        }    
+        return units;
+    },
+    events: async (unitId,group="d",timezone="UTC",startDateString,endDateString) => {
+        let {startDate,endDate} = dateRange(startDateString,endDateString)
+        endDate = escape.stringLit(endDate)
+        startDate = escape.stringLit(startDate)
+        unitId = escape.measurement(unitId)
+        group = escape.measurement(group)
+        timezone = escape.stringLit(timezone)
+        const result = await connection.query(`select sum(value) from "duration" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ group by time(1${group}) TZ(${timezone})`)
+        return result;
+    }
 }
 
 const write = (records,model,retry) => {
@@ -117,5 +127,5 @@ const disconnect = () => {
 
 module.exports.connect = connect
 module.exports.disconnect = disconnect
-module.exports.getUnits = getUnits
+module.exports.get = get
 module.exports.write = (record,model) => write([record],model,0)
