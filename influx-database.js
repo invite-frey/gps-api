@@ -1,7 +1,6 @@
 const DEBUG = process.env.DEBUG ? process.env.DEBUG==='YES' : true
 const Influx = require('influx')
 const escape = require('influx').escape
-const dateRange = require('./daterange')
 let connection = null
 let tachometerTick = 30
 
@@ -66,8 +65,8 @@ const get = {
         }    
         return units;
     },
-    events: async (unitId,group="d",timezone="UTC",startDateString,endDateString) => {
-        let {startDate,endDate} = dateRange(startDateString,endDateString)
+    events: async (unitId,group="d",timezone="UTC",dateRange) => {
+        let {startDate,endDate} = dateRange
         endDate = escape.stringLit(endDate)
         startDate = escape.stringLit(startDate)
         unitId = escape.measurement(unitId)
