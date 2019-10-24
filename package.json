@@ -1,0 +1,32 @@
+{
+  "name": "gps-api",
+  "version": "1.0.0",
+  "description": "API app to serve time event data from a gps database.",
+  "main": "app.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "influx": "^5.4.2",
+    "moment-timezone": "^0.5.27",
+    "mysql": "^2.17.1",
+    "morgan": "^1.9.1",
+    "body-parser": "^1.19.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://secure.frey.fi/var/git-repos/gps-api.git"
+  },
+  "keywords": [
+    "GPS",
+    "API",
+    "time",
+    "series"
+  ],
+  "author": "Frey Mansikkaniemi",
+  "license": "ISC"
+}
