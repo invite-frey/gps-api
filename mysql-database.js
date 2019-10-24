@@ -34,8 +34,8 @@ const get = {
             }
         } );
     },
-    message: (unitId,message,startDateString=null,endDateString=null) => {
-        let {startDate,endDate} = dateRange(startDateString,endDateString)
+    message: (unitId,message,utcStartDateString=null,utcEndDateString=null) => {
+        let {startDate,endDate} = dateRange(utcStartDateString,utcEndDateString)
         return new Promise( (resolve,reject) => {
             if(pool){
                 let result = null
