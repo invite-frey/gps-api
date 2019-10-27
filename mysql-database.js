@@ -1,6 +1,5 @@
 const DEBUG = process.env.DEBUG ? process.env.DEBUG==='YES' : true
 const mysql = require('mysql')
-const dateRange = require('./daterange')
 const maxRetries = 60
 const messages = {start: "ACCStart", stop: "ACCStop"}
 let pool = null
@@ -34,8 +33,8 @@ const get = {
             }
         } );
     },
-    message: (unitId,message,utcStartDateString=null,utcEndDateString=null) => {
-        let {startDate,endDate} = dateRange(utcStartDateString,utcEndDateString)
+    message: (unitId,message,dateRange) => {
+        let {startDate,endDate} = dateRange
         return new Promise( (resolve,reject) => {
             if(pool){
                 let result = null

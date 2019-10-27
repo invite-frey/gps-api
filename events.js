@@ -1,8 +1,7 @@
 
-
+const dateRange = require('./daterange')
 const {verifyDateString,verifiedDateStringOrNull} = require('./verifyStrings')
 const capitalize = string =>  typeof string === 'string' && string.length>0 ? string.charAt(0).toUpperCase() + string.slice(1) : string
-
 const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > new Date(eventDate).setMinutes(eventDate.getMinutes()-30)
 const verifyEndMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate > eventDate && (oppositeEventDate === null || messageDate < oppositeEventDate) && messageDate < new Date(eventDate).setMinutes(eventDate.getMinutes()+30)
 
@@ -46,10 +45,11 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=n
 
   const startDate = fromUtc ? new Date(fromUtc).toISOString() : null
   const endDate = toUtc ? new Date(toUtc).toISOString() : null
-
-  const timeEvents = await timedata.get.events(id,"m",timeZone,startDate,endDate)
-  const startMessages = await sqldata.get.message(id,sqldata.messages.start,startDate,endDate)
-  const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,startDate,endDate)
+  const range = dateRange(startDate,endDate)
+  console.log("range:",range)
+  const timeEvents = await timedata.get.events(id,"m",timeZone,range)
+  const startMessages = await sqldata.get.message(id,sqldata.messages.start,range)
+  const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,range)
 
   let event = {}
   let events = []
@@ -69,8 +69,8 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=n
   const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
   const results = {
     range: {
-      "fromUtc": startDate,
-      "toUtc": endDate
+      "fromUtc": range.startDate,
+      "toUtc": range.endDate
     },
     events: eventsWithEngineStop.newEvents.reverse(),
     unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,
