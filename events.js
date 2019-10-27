@@ -2,8 +2,19 @@
 const dateRange = require('./daterange')
 const {verifyDateString,verifiedDateStringOrNull} = require('./verifyStrings')
 const capitalize = string =>  typeof string === 'string' && string.length>0 ? string.charAt(0).toUpperCase() + string.slice(1) : string
-const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > new Date(eventDate).setMinutes(eventDate.getMinutes()-30)
-const verifyEndMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate > eventDate && (oppositeEventDate === null || messageDate < oppositeEventDate) && messageDate < new Date(eventDate).setMinutes(eventDate.getMinutes()+30)
+const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > dateWithSubtractedSeconds(eventDate,30*60)
+const verifyEndMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate > eventDate && (oppositeEventDate === null || messageDate < oppositeEventDate) && messageDate < dateWithAddedSeconds(eventDate,30*60)
+
+const dateWithAddedSeconds = (date,seconds) => {
+    const newDate = new Date(date)
+    newDate.setSeconds( new Date(date).getSeconds() + seconds )
+    return newDate;
+}
+const dateWithSubtractedSeconds = (date,seconds) => {
+    const newDate = new Date(date)
+    newDate.setSeconds( new Date(date).getSeconds() - seconds )
+    return newDate;
+}
 
 const messageReducer = ({newEvents,remainingMessages}, e, messageType, dateConditionsVerify) => {
   const oppositeMessageType = messageType === "start" ? "end" : "start"
@@ -57,11 +68,12 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=n
   for( key in timeEvents ){
     const tSum = timeEvents[key].sum || 0
     if(tSum>0 && typeof event.start==='undefined'){
-      event.start = timeEvents[key].time
+        event.start = timeEvents[key].time
     }else if(tSum<60 && typeof event.start !== 'undefined'){
-      event.end = timeEvents[key].time
-      events.push(event)
-      event = {}
+        console.log(`oRIGIN DATE   :${timeEvents[key].time.toISOString()}`)
+        event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
+        events.push(event)
+        event = {}
     }
   }
 
