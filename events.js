@@ -37,25 +37,25 @@ const startMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEve
 const stopMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEventsAndMessages,e,"end",verifyEndMessageDateConditions)  
 
 
-const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=null) => {
-  fromUtc = verifiedDateStringOrNull(fromUtc)
-  toUtc = verifiedDateStringOrNull(toUtc)
+const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
+  start = verifiedDateStringOrNull(start)
+  end = verifiedDateStringOrNull(end)
 
-  if( (!fromUtc && toUtc) || (fromUtc && !toUtc) ){
-    throw new Error(`Only received ${fromUtc ? `fromUtc '${fromUtc}'` : `toUtc '${toUtc}'`}. If 'fromUtc' or 'toUtc' query parameter is given both must be given.`)
+  if( (!start && end) || (start && !end) ){
+    throw new Error(`Only received ${start ? `start '${start}'` : `end '${end}'`}. If 'start' or 'end' query parameter is given both must be given.`)
   }
-  if( fromUtc && toUtc && !(verifyDateString(fromUtc) && verifyDateString(toUtc))){
-    throw new Error({error: `fromUtc '${fromUtc}' or toUtc '${toUtc}' invalid format.`})
+  if( start && end && !(verifyDateString(start) && verifyDateString(end))){
+    throw new Error({error: `start '${start}' or end '${end}' invalid format.`})
   }
   
-  if(toUtc && toUtc.length < 11){
-    const toUtcDate = new Date(toUtc)
-    toUtcDate.setDate(toUtcDate.getDate() + 1)
-    toUtc = toUtcDate.toISOString()
+  if(end && end.length < 11){
+    const endDate = new Date(end)
+    endDate.setDate(endDate.getDate() + 1)
+    end = endDate.toISOString()
   }
 
-  const startDate = fromUtc ? new Date(fromUtc).toISOString() : null
-  const endDate = toUtc ? new Date(toUtc).toISOString() : null
+  const startDate = start ? new Date(start).toISOString() : null
+  const endDate = end ? new Date(end).toISOString() : null
   const range = dateRange(startDate,endDate)
   console.log("range:",range)
   const timeEvents = await timedata.get.events(id,"m",timeZone,range)
@@ -68,7 +68,7 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=n
   for( key in timeEvents ){
     const tSum = timeEvents[key].sum || 0
     if(tSum>0 && typeof event.start==='undefined'){
-        event.start = timeEvents[key].time
+        event.start = tSum > 30 ? timeEvents[key].time : dateWithAddedSeconds(timeEvents[key].time,30)
     }else if(tSum<60 && typeof event.start !== 'undefined'){
         console.log(`oRIGIN DATE   :${timeEvents[key].time.toISOString()}`)
         event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
@@ -81,8 +81,8 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",fromUtc=null,toUtc=n
   const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
   const results = {
     range: {
-      "fromUtc": range.startDate,
-      "toUtc": range.endDate
+      "start": range.startDate,
+      "end": range.endDate
     },
     events: eventsWithEngineStop.newEvents.reverse(),
     unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,

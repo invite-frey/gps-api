@@ -11,7 +11,7 @@ const apiKeyMiddleware = require('./apikey.middleware')
 const port = process.env.PORT || 1337;
 const {verifyUnitId} = require('./verifyStrings')
 const events = require('./events')
-const getEvents = (id,timeZone="UTC",fromUtc=null,toUtc=null) => events.get(influx,mysql,id,timeZone,fromUtc,toUtc) 
+const getEvents = (id,timeZone="UTC",start=null,end=null) => events.get(influx,mysql,id,timeZone,start,end) 
 
 
 /**
@@ -84,10 +84,10 @@ app.get('/units/:id', async (req, res) => {
  * Example of POST json object:
  * 
  * {"ranges": [
- *     {"fromUtc" : "2019-09-22",
- *	    "toUtc" : "2019-09-25"},
- *	   {"fromUtc" : "2019-10-01",
- *	    "toUtc" : "2019-10-23"}
+ *     {"start" : "2019-09-22",
+ *	    "end" : "2019-09-25"},
+ *	   {"start" : "2019-10-01",
+ *	    "end" : "2019-10-23"}
  * ]}
  */
 app.post('/units/:id/events', async (req,res) => {
@@ -106,9 +106,9 @@ app.post('/units/:id/events', async (req,res) => {
     }
     
     const promises = ranges.map( async (range) => {
-      const {fromUtc,toUtc} = range
+      const {start,end} = range
       try{
-        return await getEvents(id,"UTC", fromUtc, toUtc);
+        return await getEvents(id,"UTC", start, end);
        
       }catch(error){
         if(error.stack) throw error;
@@ -127,15 +127,15 @@ app.post('/units/:id/events', async (req,res) => {
  * Endpoint: GET request for events for unit identified by 'id'. Returns events one month back in time by default.
  * A different time range can be set by providing the following url query parameters:
  * 
- * @param fromUtc Start of time range in UTC time. Time should be in format YYYY-DD-MM or full ISO time string.
- * @param toUtc End tome of range in UTC. Time should be in format YYYY-DD-MM or full ISO time string. If only date is given, the time range will end at the end of that day (before midnight next day).
+ * @param start Start of time range in UTC time. Time should be in format YYYY-DD-MM or full ISO time string.
+ * @param end End tome of range in UTC. Time should be in format YYYY-DD-MM or full ISO time string. If only date is given, the time range will end at the end of that day (before midnight next day).
  */
 app.get('/units/:id/events', async (req,res) => {  
   const {id} = req.params
-  const {fromUtc,toUtc} = req.query
+  const {start,end} = req.query
 
   try{
-    const results = await getEvents(id,"UTC",fromUtc,toUtc)
+    const results = await getEvents(id,"UTC",start,end)
     return res.json(results)
     
   }catch(error){
