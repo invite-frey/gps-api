@@ -25,7 +25,7 @@ const get = {
                         if(DEBUG) console.log("Database connection error: ", err.code);
                         reject(err)
                     }
-                    const sql = `SELECT * FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc ASC LIMIT 1`
+                    const sql = `SELECT * FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
                     result = await query(connection,sql)
                     const json = JSON.stringify(result)
                     resolve(JSON.parse(json))
