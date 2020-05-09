@@ -182,6 +182,30 @@ app.get('/units/:id/events/:period', async (req,res) => {
   }
 })
 
+/**
+ * Endpoint: Get waypoints for a specific time period.
+ *  
+ * @param start Start of time range in UTC time. Time should be in format YYYY-DD-MM or full ISO time string.
+ * @param end End tome of range in UTC. Time should be in format YYYY-DD-MM or full ISO time string. If only date is given, the time range will end at the end of that day (before midnight next day).
+ */
+
+app.get('/units/:id/waypoints', async (req,res) => {  
+  const {id} = req.params
+  const {start,end} = req.query
+
+  if(verifyUnitId(id)){
+    if(typeof start !== 'undefined' && typeof end !== 'undefined'){
+      const waypoints = mysql.get.waypoints(id,{startDate: endDate, end: end})
+      return res.json(waypoints);
+    }else{
+      return res.status(400).send(new Error("Start and/or end parameters missing."));
+    }
+
+  }else{
+    return res.status(400).send(new Error("Invalid id."));
+  }
+}
+
 
 /**
  * Start app.

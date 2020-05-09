@@ -25,7 +25,26 @@ const get = {
                         if(DEBUG) console.log("Database connection error: ", err.code);
                         reject(err)
                     }
-                    const sql = `SELECT * FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
+                    const sql = `SELECT ts,utc,ip,gps_signal,message,gprmc_time,gprmc_status,gprmc_lat,gprmc_lat_loc,gprmc_long,gprmc_long_loc,gprmc_gs,gprmc_track,gprmc_date,gprmc_var,gprmc_var_sense,gprmc_mode,satellites,altitude,charge,charging,mcc,mnc,lac,cellid FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
+                    result = await query(connection,sql)
+                    const json = JSON.stringify(result)
+                    resolve(JSON.parse(json))
+                })
+            }
+        } );
+    },
+    waypoints: (unitId,dateRange) => {
+        const {startDate,endDate} = dateRange
+
+        return new Promise( (resolve,reject) => {
+            if(pool){
+                let result = null
+                pool.getConnection( async (err, connection) => {
+                    if(err){
+                        if(DEBUG) console.log("Database connection error: ", err.code);
+                        reject(err)
+                    }
+                    const sql = `SELECT ts,utc,ip,gps_signal,message,gprmc_time,gprmc_status,gprmc_lat,gprmc_lat_loc,gprmc_long,gprmc_long_loc,gprmc_gs,gprmc_track,gprmc_date,gprmc_var,gprmc_var_sense,gprmc_mode,satellites,altitude,charge,charging,mcc,mnc,lac,cellid FROM data WHERE WHERE utc BETWEEN ${connection.escape(startDate)} AND ${connection.escape(endDate)} AND unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC`
                     result = await query(connection,sql)
                     const json = JSON.stringify(result)
                     resolve(JSON.parse(json))
