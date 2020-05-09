@@ -204,7 +204,7 @@ app.get('/units/:id/waypoints', async (req,res) => {
   }else{
     return res.status(400).send(new Error("Invalid id."));
   }
-}
+})
 
 
 /**
