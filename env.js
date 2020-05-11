@@ -3,7 +3,7 @@ const mysql = {
     user: process.env.DB_USER || "gps",
     password: process.env.DB_PASSWORD || "password",
     database: process.env.DB || "gps",
-    connectionLimit: 100
+    connectionLimit: 150
 }
 
 const influxdb = {
