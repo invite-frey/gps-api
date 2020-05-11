@@ -63,7 +63,6 @@ app.get('/units/:id', async (req, res) => {
   try{
     const id = req.params.id
     if(verifyUnitId(id)){
-      console.log("Getting unit data")
       const unitData = await mysql.get.unit(id)
       if(unitData.length===1){
         return res.json(unitData[0])
@@ -93,11 +92,9 @@ app.get('/units/:id', async (req, res) => {
  * ]}
  */
 app.post('/units/:id/events', async (req,res) => {
-  console.log("User: ", req.apiUser)
   try{
     const {id} = req.params
     const {ranges} = req.body
-    console.log(req.body)
 
     if( !Array.isArray(ranges) ){
       return res.status(400).send({error: "POST path needs a set of ranges."})

@@ -57,7 +57,6 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
   const startDate = start ? new Date(start).toISOString() : null
   const endDate = end ? new Date(end).toISOString() : null
   const range = dateRange(startDate,endDate)
-  console.log("range:",range)
   const timeEvents = await timedata.get.events(id,"m",timeZone,range)
   const startMessages = await sqldata.get.message(id,sqldata.messages.start,range)
   const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,range)
@@ -70,7 +69,6 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
     if(tSum>0 && typeof event.start==='undefined'){
         event.start = tSum > 30 ? timeEvents[key].time : dateWithAddedSeconds(timeEvents[key].time,30)
     }else if(tSum<60 && typeof event.start !== 'undefined'){
-        //console.log(`oRIGIN DATE   :${timeEvents[key].time.toISOString()}`)
         event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
         events.push(event)
         event = {}
