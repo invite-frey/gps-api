@@ -194,7 +194,7 @@ app.get('/units/:id/waypoints', async (req,res) => {
 
   if(verifyUnitId(id)){
     if(typeof start !== 'undefined' && typeof end !== 'undefined'){
-      const waypoints = mysql.get.waypoints(id,{startDate: endDate, end: end})
+      const waypoints = mysql.get.waypoints(id,{startDate: start, endDate: end})
       return res.json(waypoints);
     }else{
       return res.status(400).send(new Error("Start and/or end parameters missing."));
