@@ -73,6 +73,7 @@ app.get('/units/:id', async (req, res) => {
       return res.status(400).send(new Error("Invalid id."))
     }
   }catch(error){
+    console.log(error)
     return res.status(500).send(error.message)
   }
 });
@@ -111,8 +112,8 @@ app.post('/units/:id/events', async (req,res) => {
         return await getEvents(id,"UTC", start, end);
        
       }catch(error){
-        if(error.stack) throw error;
-        return {"error": error.message}
+        console.log(error)
+        return res.status(500).send(error.message)
       }      
     }) 
 
