@@ -63,6 +63,7 @@ app.get('/units/:id', async (req, res) => {
   try{
     const id = req.params.id
     if(verifyUnitId(id)){
+      console.log("Getting unit data")
       const unitData = await mysql.get.unit(id)
       if(unitData.length===1){
         return res.json(unitData[0])
