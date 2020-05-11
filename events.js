@@ -70,7 +70,7 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
     if(tSum>0 && typeof event.start==='undefined'){
         event.start = tSum > 30 ? timeEvents[key].time : dateWithAddedSeconds(timeEvents[key].time,30)
     }else if(tSum<60 && typeof event.start !== 'undefined'){
-        console.log(`oRIGIN DATE   :${timeEvents[key].time.toISOString()}`)
+        //console.log(`oRIGIN DATE   :${timeEvents[key].time.toISOString()}`)
         event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
         events.push(event)
         event = {}
