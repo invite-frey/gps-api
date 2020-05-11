@@ -96,7 +96,7 @@ app.post('/units/:id/events', async (req,res) => {
   console.log("User: ", req.apiUser)
   try{
     const {id} = req.params
-    const {ranges,timeZone} = req.body
+    const {ranges} = req.body
     console.log(req.body)
 
     if( !Array.isArray(ranges) ){
