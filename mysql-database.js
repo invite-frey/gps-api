@@ -3,7 +3,6 @@ const mysql = require('mysql')
 const maxRetries = 60
 const messages = {start: "ACCStart", stop: "ACCStop"}
 let pool = null
-let propertyToFieldMap = null
 
 const query = (connection,sql,args) => {
     return new Promise( ( resolve, reject ) => {
