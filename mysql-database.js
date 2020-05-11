@@ -29,9 +29,9 @@ const get = {
                     const sql = `SELECT ts,utc,ip,gps_signal,message,gprmc_time,gprmc_status,gprmc_lat,gprmc_lat_loc,gprmc_long,gprmc_long_loc,gprmc_gs,gprmc_track,gprmc_date,gprmc_var,gprmc_var_sense,gprmc_mode,satellites,altitude,charge,charging,mcc,mnc,lac,cellid FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
                     console.log('Executing sql')
                     result = await query(connection,sql)
-                    connection.release()
                     console.log('Sql query finished',result)
                     const json = JSON.stringify(result)
+                    connection.release()
                     resolve(JSON.parse(json))
                 })
             }
@@ -50,8 +50,8 @@ const get = {
                     }
                     const sql = `SELECT ts,utc,ip,gps_signal,message,gprmc_time,gprmc_status,gprmc_lat,gprmc_lat_loc,gprmc_long,gprmc_long_loc,gprmc_gs,gprmc_track,gprmc_date,gprmc_var,gprmc_var_sense,gprmc_mode,satellites,altitude,charge,charging,mcc,mnc,lac,cellid FROM data WHERE WHERE utc BETWEEN ${connection.escape(startDate)} AND ${connection.escape(endDate)} AND unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC`
                     result = await query(connection,sql)
-                    connection.release()
                     const json = JSON.stringify(result)
+                    connection.release()
                     resolve(JSON.parse(json))
                 })
             }
@@ -70,9 +70,8 @@ const get = {
                     const sql = `SELECT utc,message FROM data WHERE utc BETWEEN ${connection.escape(startDate)} AND ${connection.escape(endDate)} AND unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' AND message=${connection.escape(message)} ORDER BY utc DESC`
                  
                     result = await query(connection,sql)
-                    connection.release()
-                    
                     const json = JSON.stringify(result)
+                    connection.release()
                     resolve(JSON.parse(json))
                 })
             }
