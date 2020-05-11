@@ -26,6 +26,8 @@ const get = {
                     }
                     const sql = `SELECT ts,utc,ip,gps_signal,message,gprmc_time,gprmc_status,gprmc_lat,gprmc_lat_loc,gprmc_long,gprmc_long_loc,gprmc_gs,gprmc_track,gprmc_date,gprmc_var,gprmc_var_sense,gprmc_mode,satellites,altitude,charge,charging,mcc,mnc,lac,cellid FROM data WHERE unit_id LIKE ${connection.escape("%"+unitId)} AND gps_signal='F' ORDER BY utc DESC LIMIT 1`
                     result = await query(connection,sql)
+
+                    //Stringify the object coming out of the mysql query to be able to convert it into a regular Javascript object
                     const json = JSON.stringify(result)
                     connection.release()
                     resolve(JSON.parse(json))
