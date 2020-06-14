@@ -58,8 +58,7 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
   const endDate = end ? new Date(end).toISOString() : null
   const range = dateRange(startDate,endDate)
   const timeEvents = await timedata.get.events(id,"m",timeZone,range)
-  //const startMessages = await sqldata.get.message(id,sqldata.messages.start,range)
-  //const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,range)
+  
 
   let event = {}
   let events = []
@@ -75,16 +74,30 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
     }
   }
 
-  //const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
-  //const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
+  if( sqldata ){
+    const startMessages =  await sqldata.get.message(id,sqldata.messages.start,range) 
+    const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,range)
+    const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
+    const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
+    const results = {
+      range: {
+        "start": range.startDate,
+        "end": range.endDate
+      },
+      events: eventsWithEngineStop.newEvents.reverse(),
+      unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,
+      unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
+    }
+    return results;
+  }
+
+  
   const results = {
     range: {
       "start": range.startDate,
       "end": range.endDate
     },
-    events: events,//eventsWithEngineStop.newEvents.reverse(),
-    //unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,
-    //unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
+    events: events
   }
 
   return results;

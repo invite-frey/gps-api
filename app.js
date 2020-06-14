@@ -11,7 +11,7 @@ const apiKeyMiddleware = require('./apikey.middleware')
 const port = process.env.PORT || 1337;
 const {verifyUnitId} = require('./verifyStrings')
 const events = require('./events')
-const getEvents = (id,timeZone="UTC",start=null,end=null) => events.get(influx,mysql,id,timeZone,start,end) 
+const getEvents = (id,timeZone="UTC",start=null,end=null,accEvents=false) => events.get(influx,accEvents ? mysql : null,id,timeZone,start,end) 
 
 
 /**
@@ -90,11 +90,16 @@ app.get('/units/:id', async (req, res) => {
  *	   {"start" : "2019-10-01",
  *	    "end" : "2019-10-23"}
  * ]}
+ * 
+ * @param accEvents 'yes' to inculde engineStart and engineStop events (slower)
  */
 app.post('/units/:id/events', async (req,res) => {
   try{
     const {id} = req.params
     const {ranges} = req.body
+    const {accEvents} = req.query
+
+    const includeAccEvents = accEvents && accEvents === 'yes'
 
     if( !Array.isArray(ranges) ){
       return res.status(400).send({error: "POST path needs a set of ranges."})
@@ -107,7 +112,7 @@ app.post('/units/:id/events', async (req,res) => {
     const promises = ranges.map( async (range) => {
       const {start,end} = range
       try{
-        return await getEvents(id,"UTC", start, end);
+        return await getEvents(id,"UTC", start, end, includeAccEvents);
        
       }catch(error){
         console.log(error)
