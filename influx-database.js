@@ -72,7 +72,8 @@ const get = {
         unitId = escape.measurement(unitId)
         group = escape.measurement(group)
         timezone = escape.stringLit(timezone)
-        const result = await connection.query(`select sum(value) from "duration" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ group by time(1${group}) TZ(${timezone})`)
+        const query = `select sum(value) from "duration" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ group by time(1${group}) TZ(${timezone})`
+        const result = await connection.query(query)
         return result;
     }
 }
