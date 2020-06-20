@@ -123,16 +123,18 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
         }
 
-        let waypointPromises = []
-        for (const key in results.events) {
-          if (results.events.hasOwnProperty(key)) {
-            const event = results.events[key];
-            const promise = sqldata.get.waypoints(id,{startDate: event.start, endDate: event.end})
-            waypointPromises.push(promise)
-          }
-        }
-
         resolve(results);
+
+        // let waypointPromises = []
+        // for (const key in results.events) {
+        //   if (results.events.hasOwnProperty(key)) {
+        //     const event = results.events[key];
+        //     const promise = sqldata.get.waypoints(id,{startDate: event.start, endDate: event.end})
+        //     waypointPromises.push(promise)
+        //   }
+        // }
+
+        
 
         // Promise.all(waypointPromises)
         //   .then( waypointSets => {
