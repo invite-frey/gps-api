@@ -92,12 +92,13 @@ app.get('/units/:id', async (req, res) => {
  * ]}
  * 
  * @param accEvents 'yes' to inculde engineStart and engineStop events (slower)
+ * @param distance 'no': default, 'exact': perform a geometric distance calculation (slower), 'approx': perform approximate distance calculation based on integrating speed over time (faster) 
  */
 app.post('/units/:id/events', async (req,res) => {
   try{
     const {id} = req.params
     const {ranges} = req.body
-    const {accEvents} = req.query
+    const {accEvents,distance='no'} = req.query
 
     const includeAccEvents = accEvents && accEvents === 'yes'
 
@@ -112,7 +113,16 @@ app.post('/units/:id/events', async (req,res) => {
     const promises = ranges.map( async (range) => {
       const {start,end} = range
       try{
-        return await getEvents(id,"UTC", start, end, includeAccEvents);
+        const eventObject = await getEvents(id,"UTC", start, end, includeAccEvents);
+        if( distance !== 'no' ){
+          const waypoints = await mysql.get.waypoints(id,{startDate: start, endDate: end})
+          const eventsWithWaypoints = eventObject.events.map( event => {
+            return {...event, waypoints: waypoints.filter( waypoint => events.isApiEventInRanges({start: waypoint.utc, end: waypoint.utc}, [event]))};
+          })
+          return {...eventObject, events: eventsWithWaypoints};
+        }
+
+        return eventObject;
        
       }catch(error){
         console.log(error)
@@ -136,10 +146,10 @@ app.post('/units/:id/events', async (req,res) => {
  */
 app.get('/units/:id/events', async (req,res) => {  
   const {id} = req.params
-  const {start,end} = req.query
+  const {start,end,accEvents,distance='no'} = req.query
 
   try{
-    const results = await getEvents(id,"UTC",start,end)
+    const results = await getEvents(id,"UTC",start,end,accEvents)
     return res.json(results)
     
   }catch(error){

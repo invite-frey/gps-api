@@ -5,6 +5,31 @@ const capitalize = string =>  typeof string === 'string' && string.length>0 ? st
 const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > dateWithSubtractedSeconds(eventDate,30*60)
 const verifyEndMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate > eventDate && (oppositeEventDate === null || messageDate < oppositeEventDate) && messageDate < dateWithAddedSeconds(eventDate,30*60)
 
+
+const isApiEventInRanges = (event,ranges) => {
+    
+  if( ranges.length === 0 )
+      return false;
+
+  const eventStart = moment(event.start)
+  const eventEnd = moment(event.end)
+
+  if( !(eventStart.isAfter( ranges[0].start ) && eventEnd.isBefore(ranges[ranges.length-1].end)) ){
+      return false;
+  }
+      
+  if( ranges.length === 1)
+      return true;
+
+  const midIndex = Math.floor( ranges.length / 2 )
+  const midRange = ranges[midIndex-1]
+
+  if( eventEnd.isBefore(midRange.end) )
+      return isApiEventInRanges(event,ranges.slice(0,midIndex));
+
+  return isApiEventInRanges(event,ranges.slice(midIndex));
+}
+
 const dateWithAddedSeconds = (date,seconds) => {
     const newDate = new Date(date)
     newDate.setSeconds( new Date(date).getSeconds() + seconds )
@@ -104,3 +129,4 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
 }
 
 module.exports.get = getEvents
+module.exports.isApiEventInRanges = isApiEventInRanges
