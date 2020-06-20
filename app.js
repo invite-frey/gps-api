@@ -239,7 +239,8 @@ app.post('/units/:id/waypoints', async (req,res) => {
           return res.status(500).send(error.message)
         }      
       }) 
-      return res.json(Promise.all(promises));
+      const allWaypoints = await Promise.all(promises)
+      return res.json(allWaypoints);
     }else{
       return res.status(400).send(new Error("Start and/or end parameters missing."));
     }
