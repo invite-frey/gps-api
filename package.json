@@ -4,14 +4,15 @@
   "description": "API app to serve time event data from a gps database.",
   "main": "app.js",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "influx": "^5.4.2",
+    "moment": "^2.27.0",
     "moment-timezone": "^0.5.27",
-    "mysql": "^2.17.1",
     "morgan": "^1.9.1",
-    "body-parser": "^1.19.0"
+    "mysql": "^2.17.1"
   },
   "devDependencies": {},
   "scripts": {

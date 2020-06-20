@@ -1,5 +1,6 @@
 
 const dateRange = require('./daterange')
+const moment = require('moment')
 const {verifyDateString,verifiedDateStringOrNull} = require('./verifyStrings')
 const capitalize = string =>  typeof string === 'string' && string.length>0 ? string.charAt(0).toUpperCase() + string.slice(1) : string
 const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > dateWithSubtractedSeconds(eventDate,30*60)
