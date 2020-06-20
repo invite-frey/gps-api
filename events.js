@@ -63,7 +63,7 @@ const startMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEve
 const stopMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEventsAndMessages,e,"end",verifyEndMessageDateConditions)  
 
 
-const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
+const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
   start = verifiedDateStringOrNull(start)
   end = verifiedDateStringOrNull(end)
 
@@ -83,50 +83,73 @@ const getEvents = async (timedata,sqldata,id,timeZone="UTC",start=null,end=null)
   const startDate = start ? new Date(start).toISOString() : null
   const endDate = end ? new Date(end).toISOString() : null
   const range = dateRange(startDate,endDate)
-  const timeEvents = await timedata.get.events(id,"m",timeZone,range)
+  const timeEventsPromise =  timedata.get.events(id,"m",timeZone,range)
+  const startMessagesPromise =   sqldata.get.message(id,sqldata.messages.start,range) 
+  const stopMessagesPromise =  sqldata.get.message(id,sqldata.messages.stop,range)
+  
+  return( new Promise( (resolve,reject) => {
+
+    Promise.all([timeEventsPromise,startMessagesPromise,stopMessagesPromise])
+      .then( results => {
+        const timeEvents = results[0]
+        const startMessages = results[1]
+        const stopMessages = results[2]
+
+        let event = {}
+        let events = []
+
+        for( key in timeEvents ){
+          const tSum = timeEvents[key].sum || 0
+          if(tSum>0 && typeof event.start==='undefined'){
+              event.start = tSum > 30 ? timeEvents[key].time : dateWithAddedSeconds(timeEvents[key].time,30)
+          }else if(tSum<60 && typeof event.start !== 'undefined'){
+              event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
+              events.push(event)
+              event = {}
+          }
+        }
+
+      
+          
+        const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
+        const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
+        const results = {
+          range: {
+            "start": range.startDate,
+            "end": range.endDate
+          },
+          events: eventsWithEngineStop.newEvents.reverse(),
+          unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,
+          unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
+        }
+
+        let waypointPromises = []
+        for (const key in results.events) {
+          if (results.events.hasOwnProperty(key)) {
+            const event = results.events[key];
+            const promise = sqldata.get.waypoints(id,{startDate: event.start, endDate: event.end})
+            waypointPromises.push(promise)
+          }
+        }
+
+        Promise.all(waypointPromises)
+          .then( waypointSets => {
+            for (const key in waypointSets) {
+              if (waypointSets.hasOwnProperty(key)) {
+                const waypointSet = waypointSets[key];
+                results.events[key].waypoints = waypointSet
+              }
+            }
+            resolve(results);
+          })
+      })
+
+  }))
+
+  
+   
   
 
-  let event = {}
-  let events = []
-
-  for( key in timeEvents ){
-    const tSum = timeEvents[key].sum || 0
-    if(tSum>0 && typeof event.start==='undefined'){
-        event.start = tSum > 30 ? timeEvents[key].time : dateWithAddedSeconds(timeEvents[key].time,30)
-    }else if(tSum<60 && typeof event.start !== 'undefined'){
-        event.end = tSum < 30 ? dateWithSubtractedSeconds(timeEvents[key].time,60) : dateWithSubtractedSeconds(timeEvents[key].time,30)
-        events.push(event)
-        event = {}
-    }
-  }
-
-  if( sqldata ){
-    const startMessages =  await sqldata.get.message(id,sqldata.messages.start,range) 
-    const stopMessages = await sqldata.get.message(id,sqldata.messages.stop,range)
-    const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
-    const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
-    const results = {
-      range: {
-        "start": range.startDate,
-        "end": range.endDate
-      },
-      events: eventsWithEngineStop.newEvents.reverse(),
-      unmatchedEngineRunStartMessages: eventsWithEngineStart.remainingMessages,
-      unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
-    }
-    return results;
-  }
-
-  
-  const results = {
-    range: {
-      "start": range.startDate,
-      "end": range.endDate
-    },
-    events: events
-  }
-
-  return results;
 }
 
 module.exports.get = getEvents

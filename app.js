@@ -11,7 +11,7 @@ const apiKeyMiddleware = require('./apikey.middleware')
 const port = process.env.PORT || 1337;
 const {verifyUnitId} = require('./verifyStrings')
 const events = require('./events')
-const getEvents = (id,timeZone="UTC",start=null,end=null,accEvents=false) => events.get(influx,accEvents ? mysql : null,id,timeZone,start,end) 
+const getEvents = (id,timeZone="UTC",start=null,end=null) => events.get(influx,mysql,id,timeZone,start,end) 
 
 
 /**
@@ -113,16 +113,7 @@ app.post('/units/:id/events', async (req,res) => {
     const promises = ranges.map( async (range) => {
       const {start,end} = range
       try{
-        const eventObject = await getEvents(id,"UTC", start, end, includeAccEvents);
-        if( distance !== 'no' ){
-          const waypoints = await mysql.get.waypoints(id,{startDate: start, endDate: end})
-          const eventsWithWaypoints = eventObject.events.map( event => {
-            return {...event, waypoints: waypoints.filter( waypoint => events.isApiEventInRanges({start: waypoint.utc, end: waypoint.utc}, [event]))};
-          })
-          return {...eventObject, events: eventsWithWaypoints};
-        }
-
-        return eventObject;
+        return await getEvents(id,"UTC", start, end);;
        
       }catch(error){
         console.log(error)
