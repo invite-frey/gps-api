@@ -125,6 +125,8 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
 
         resolve(results);
 
+        
+
         // let waypointPromises = []
         // for (const key in results.events) {
         //   if (results.events.hasOwnProperty(key)) {
@@ -133,8 +135,6 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
         //     waypointPromises.push(promise)
         //   }
         // }
-
-        
 
         // Promise.all(waypointPromises)
         //   .then( waypointSets => {

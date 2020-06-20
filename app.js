@@ -211,6 +211,46 @@ app.get('/units/:id/waypoints', async (req,res) => {
   }
 })
 
+/**
+ * Endpoint: Get waypoints for multiple time periods
+ * 
+ *  * Example of POST json object:
+ * 
+ * {"ranges": [
+ *     {"start" : "2019-09-22",
+ *	    "end" : "2019-09-25"},
+ *	   {"start" : "2019-10-01",
+ *	    "end" : "2019-10-23"}
+ * ]}
+ */
+
+app.post('/units/:id/waypoints', async (req,res) => {  
+  const {id} = req.params
+  const {ranges} = req.body
+
+  if(verifyUnitId(id)){
+    if(typeof start !== 'undefined' && typeof end !== 'undefined'){
+     
+      const promises = ranges.map( async (range) => {
+        const {start,end} = range
+        try{
+          return await mysql.get.waypoints(id,{startDate: start, endDate: end})
+         
+        }catch(error){
+          console.log(error)
+          return res.status(500).send(error.message)
+        }      
+      }) 
+      return res.json(Promise.all(promises));
+    }else{
+      return res.status(400).send(new Error("Start and/or end parameters missing."));
+    }
+
+  }else{
+    return res.status(400).send(new Error("Invalid id."));
+  }
+})
+
 
 /**
  * Start app.
