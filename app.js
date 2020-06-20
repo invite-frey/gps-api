@@ -98,9 +98,7 @@ app.post('/units/:id/events', async (req,res) => {
   try{
     const {id} = req.params
     const {ranges} = req.body
-    const {accEvents,distance='no'} = req.query
-
-    const includeAccEvents = accEvents && accEvents === 'yes'
+   
 
     if( !Array.isArray(ranges) ){
       return res.status(400).send({error: "POST path needs a set of ranges."})
@@ -229,7 +227,7 @@ app.post('/units/:id/waypoints', async (req,res) => {
   const {ranges} = req.body
 
   if(verifyUnitId(id)){
-    if(typeof start !== 'undefined' && typeof end !== 'undefined'){
+    if(typeof ranges !== 'undefined'){
      
       const promises = ranges.map( async (range) => {
         const {start,end} = range
