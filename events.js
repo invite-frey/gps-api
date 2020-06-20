@@ -132,16 +132,18 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           }
         }
 
-        Promise.all(waypointPromises)
-          .then( waypointSets => {
-            for (const key in waypointSets) {
-              if (waypointSets.hasOwnProperty(key)) {
-                const waypointSet = waypointSets[key];
-                results.events[key].waypoints = waypointSet
-              }
-            }
-            resolve(results);
-          })
+        resolve(results);
+
+        // Promise.all(waypointPromises)
+        //   .then( waypointSets => {
+        //     for (const key in waypointSets) {
+        //       if (waypointSets.hasOwnProperty(key)) {
+        //         const waypointSet = waypointSets[key];
+        //         results.events[key].waypoints = waypointSet
+        //       }
+        //     }
+        //     resolve(results);
+        //   })
       })
 
   }))
