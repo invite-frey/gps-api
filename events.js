@@ -90,10 +90,10 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
   return( new Promise( (resolve,reject) => {
 
     Promise.all([timeEventsPromise,startMessagesPromise,stopMessagesPromise])
-      .then( results => {
-        const timeEvents = results[0]
-        const startMessages = results[1]
-        const stopMessages = results[2]
+      .then( values => {
+        const timeEvents = values[0]
+        const startMessages = values[1]
+        const stopMessages = values[2]
 
         let event = {}
         let events = []
