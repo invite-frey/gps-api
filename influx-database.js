@@ -83,9 +83,9 @@ const get = {
         unitId = escape.measurement(unitId)
         timezone = escape.stringLit(timezone)
         const query = `select integral(value) / 3600 from "speed" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ TZ(${timezone})`
-        console.log(query)
         const result = await connection.query(query)
-        return result;
+        const distance = Array.isArray(result) && result.length > 0 ? result[0].integral : 0
+        return distance;
     }
 }
 
