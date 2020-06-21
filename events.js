@@ -109,6 +109,19 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           }
         }
 
+        for (const key in events) {
+          if (results.events.hasOwnProperty(key)) {
+            const event = events[key];
+            try{
+              const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
+              events[key].distance = distanceCalculation.integral
+            }catch( e ){
+              reject(e)
+            }
+            
+          }
+        }
+
         const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
         const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
         const results = {
@@ -121,18 +134,7 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
         }
 
-        for (const key in results.events) {
-          if (results.events.hasOwnProperty(key)) {
-            const event = results.events[key];
-            try{
-              const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
-              event.distance = distanceCalculation.integral
-            }catch( e ){
-              reject(e)
-            }
-            
-          }
-        }
+        
 
         resolve(results);
 
