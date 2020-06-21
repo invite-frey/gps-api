@@ -115,7 +115,7 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
             try{
               const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
               console.log(Array.isArray(distanceCalculation) ? distanceCalculation[0] : "No array")
-              events[key].distance = distanceCalculation.length > 0 ? distanceCalculation[0].time.integral : 0;
+              events[key].distance = distanceCalculation.length > 0 ? distanceCalculation[0].integral : 0;
             }catch( e ){
               reject(e)
             }
