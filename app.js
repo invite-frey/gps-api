@@ -11,7 +11,7 @@ const apiKeyMiddleware = require('./apikey.middleware')
 const port = process.env.PORT || 1337;
 const {verifyUnitId} = require('./verifyStrings')
 const events = require('./events')
-const getEvents = (id,timeZone="UTC",start=null,end=null) => events.get(influx,mysql,id,timeZone,start,end) 
+const getEvents = (id,timeZone="UTC",start=null,end=null,accEvents=true,distance=true) => events.get(influx,mysql,id,timeZone,start,end) 
 
 
 /**
@@ -91,13 +91,14 @@ app.get('/units/:id', async (req, res) => {
  *	    "end" : "2019-10-23"}
  * ]}
  * 
- * @param accEvents 'yes' to inculde engineStart and engineStop events (slower)
- * @param distance 'no': default, 'exact': perform a geometric distance calculation (slower), 'approx': perform approximate distance calculation based on integrating speed over time (faster) 
+ * @param accEvents yes|no Inculde engineStart and engineStop events (slower)
+ * @param distance yes|no Include an approximate distance calculation (integrate speed over time) 
  */
 app.post('/units/:id/events', async (req,res) => {
   try{
     const {id} = req.params
     const {ranges} = req.body
+    const {accEvents='yes',distance='yes'} = req.query
    
 
     if( !Array.isArray(ranges) ){
@@ -111,7 +112,7 @@ app.post('/units/:id/events', async (req,res) => {
     const promises = ranges.map( async (range) => {
       const {start,end} = range
       try{
-        return await getEvents(id,"UTC", start, end);;
+        return await getEvents(id,"UTC", start, end, accEvents==='yes', distance==='yes');;
        
       }catch(error){
         console.log(error)

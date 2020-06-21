@@ -63,7 +63,7 @@ const startMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEve
 const stopMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEventsAndMessages,e,"end",verifyEndMessageDateConditions)  
 
 
-const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
+const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null,accEvents,distance) => {
   start = verifiedDateStringOrNull(start)
   end = verifiedDateStringOrNull(end)
 
@@ -84,8 +84,8 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
   const endDate = end ? new Date(end).toISOString() : null
   const range = dateRange(startDate,endDate)
   const timeEventsPromise =  timedata.get.events(id,"m",timeZone,range)
-  const startMessagesPromise =   sqldata.get.message(id,sqldata.messages.start,range) 
-  const stopMessagesPromise =  sqldata.get.message(id,sqldata.messages.stop,range)
+  const startMessagesPromise =  accEvents ? sqldata.get.message(id,sqldata.messages.start,range) : []
+  const stopMessagesPromise = accEvents ? sqldata.get.message(id,sqldata.messages.stop,range) : []
   
   return( new Promise( (resolve,reject) => {
 
@@ -109,17 +109,20 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           }
         }
 
-        for (const key in events) {
-          if (events.hasOwnProperty(key)) {
-            const event = events[key];
-            try{
-              events[key].distance = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
-            }catch( e ){
-              reject(e)
+        if( distance ){
+          for (const key in events) {
+            if (events.hasOwnProperty(key)) {
+              const event = events[key];
+              try{
+                events[key].distance = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
+              }catch( e ){
+                reject(e)
+              }
+              
             }
-            
           }
         }
+        
 
         const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
         const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
