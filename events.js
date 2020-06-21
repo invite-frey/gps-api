@@ -124,8 +124,13 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
         for (const key in results.events) {
           if (results.events.hasOwnProperty(key)) {
             const event = results.events[key];
-            const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: event.start, endDate: event.end})
-            event.distance = distanceCalculation.integral
+            try{
+              const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: event.start, endDate: event.end})
+              event.distance = distanceCalculation.integral
+            }catch( e ){
+              reject(e)
+            }
+            
           }
         }
 
