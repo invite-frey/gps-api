@@ -110,7 +110,7 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
         }
 
         for (const key in events) {
-          if (results.events.hasOwnProperty(key)) {
+          if (events.hasOwnProperty(key)) {
             const event = events[key];
             try{
               const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: new Date(event.start).toISOString(), endDate: new Date(event.end).toISOString()})
