@@ -121,8 +121,6 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           }
         }
 
-        console.log(events)
-
         const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
         const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
         const results = {
