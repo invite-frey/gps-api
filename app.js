@@ -11,7 +11,7 @@ const apiKeyMiddleware = require('./apikey.middleware')
 const port = process.env.PORT || 1337;
 const {verifyUnitId} = require('./verifyStrings')
 const events = require('./events')
-const getEvents = (id,timeZone="UTC",start=null,end=null,accEvents=true,distance=true) => events.get(influx,mysql,id,timeZone,start,end) 
+const getEvents = (id,timeZone="UTC",start=null,end=null,accEvents=true,distance=true) => events.get(influx,mysql,id,timeZone,start,end,accEvents,distance) 
 
 
 /**
