@@ -109,8 +109,6 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           }
         }
 
-      
-          
         const eventsWithEngineStart = events.reduce(startMessageReducer, {newEvents:[],remainingMessages:[...startMessages]})
         const eventsWithEngineStop = eventsWithEngineStart.newEvents.reverse().reduce(stopMessageReducer, {newEvents:[], remainingMessages:[...stopMessages]})
         const results = {
@@ -123,9 +121,15 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null) => {
           unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
         }
 
-        resolve(results);
+        for (const key in results.events) {
+          if (results.events.hasOwnProperty(key)) {
+            const event = results.events[key];
+            const distanceCalculation = await timedata.get.distance(id,timeZone,{startDate: event.start, endDate: event.end})
+            event.distance = distanceCalculation.integral
+          }
+        }
 
-        
+        resolve(results);
 
         // let waypointPromises = []
         // for (const key in results.events) {

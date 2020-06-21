@@ -75,6 +75,16 @@ const get = {
         const query = `select sum(value) from "duration" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ group by time(1${group}) TZ(${timezone})`
         const result = await connection.query(query)
         return result;
+    },
+    distance: async (unitId,timezone="UTC",dateRange) => {
+        let {startDate,endDate} = dateRange
+        endDate = escape.stringLit(endDate)
+        startDate = escape.stringLit(startDate)
+        unitId = escape.measurement(unitId)
+        timezone = escape.stringLit(timezone)
+        const query = `select integral(value) from "speed" where time > ${startDate} and time < ${endDate} and unit =~ /.*${unitId}/ TZ(${timezone})`
+        const result = await connection.query(query)
+        return result;
     }
 }
 
