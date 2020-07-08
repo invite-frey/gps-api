@@ -4,6 +4,13 @@ const maxRetries = 60
 const messages = {start: "ACCStart", stop: "ACCStop"}
 let pool = null
 
+/**
+ * Perform MySQL query
+ * @param {*} connection The MySQL connection object.
+ * @param {*} sql The sql query string.
+ * @param {*} args Query args.
+ */
+
 const query = (connection,sql,args) => {
     return new Promise( ( resolve, reject ) => {
         connection.query( sql, args, ( err, rows ) => {
@@ -14,7 +21,13 @@ const query = (connection,sql,args) => {
     } );
 }
 
+/**
+ * Get various pieces of information from the MySQL database
+ */
 const get = {
+    /**
+     * Get latest available data for a unit with id = unitId.
+     */
     unit: (unitId) => {
         return new Promise( (resolve,reject) => {
             if(pool){
@@ -35,6 +48,9 @@ const get = {
             }
         } );
     },
+    /**
+     * Get waypoints for tracker with id=unitId in a range of dates represented by dateRange.
+     */
     waypoints: (unitId,dateRange) => {
         const {startDate,endDate} = dateRange
 
@@ -55,6 +71,9 @@ const get = {
             }
         } );
     },
+    /**
+     * Get all messages of type message in dateRange.
+     */
     message: (unitId,message,dateRange) => {
         let {startDate,endDate} = dateRange
         return new Promise( (resolve,reject) => {
@@ -76,6 +95,12 @@ const get = {
         } );
     }
 }
+
+/**
+ * Create a database compatible object from an object parsed from a tracker.
+ * @param {*} record The tracker record.
+ * @param {*} model The model.
+ */
 
 const mappedObject = (record,model) => {
     const mapped =  Object.keys(model.databaseMap).reduce( (result, key) => {
@@ -104,6 +129,12 @@ const mappedObject = (record,model) => {
     return mapped
 }
 
+/**
+ * Connect to MySQL database.
+ * 
+ * @param {*} config Database config params.
+ */
+
 const connect = (config) => {
     if(!config){
         throw "Unable to use null config for mysql."
@@ -112,11 +143,23 @@ const connect = (config) => {
     pool = mysql.createPool(config)
 }
 
+/**
+ * Disconnect from database.
+ */
 const disconnect = () => {
     pool.end( (err) => {
         if(DEBUG) console.log('Mysql database disconnected.')
     })
 }
+
+/**
+ * Retry a write after failed attempt.
+ * @param {*} records 
+ * @param {*} model 
+ * @param {*} retry 
+ * @param {*} resolve 
+ * @param {*} reject 
+ */
 
 const retryWrite = (records,model,retry,resolve,reject) => {
     setTimeout(() => {
@@ -126,6 +169,15 @@ const retryWrite = (records,model,retry,resolve,reject) => {
     },1000*(retry+1))
 }
 
+
+/**
+ * Attempt a write, for a max number of attempts.
+ * @param {*} records The records to write
+ * @param {*} model The model
+ * @param {*} retry The actual number of retries
+ * 
+ * @returns Promise that resolves on complesion.
+ */
 const write = (records,model,retry) => {
 
     return new Promise( (resolve,reject) => {

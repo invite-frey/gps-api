@@ -6,6 +6,11 @@ const capitalize = string =>  typeof string === 'string' && string.length>0 ? st
 const verifyStartMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate < eventDate && (oppositeEventDate === null || messageDate > oppositeEventDate) && messageDate > dateWithSubtractedSeconds(eventDate,30*60)
 const verifyEndMessageDateConditions = (messageDate,eventDate,oppositeEventDate) => messageDate > eventDate && (oppositeEventDate === null || messageDate < oppositeEventDate) && messageDate < dateWithAddedSeconds(eventDate,30*60)
 
+/**
+ * Check if event is entirely inside any range in the array of ranges.
+ * @param {*} event The event to assess.
+ * @param {*} ranges An array of ranges the event should be inside.
+ */
 
 const isApiEventInRanges = (event,ranges) => {
     
@@ -31,16 +36,43 @@ const isApiEventInRanges = (event,ranges) => {
   return isApiEventInRanges(event,ranges.slice(midIndex));
 }
 
+/**
+ * Add some seconds to a date and return a new date.
+ * 
+ * @param {Date} date The original date.
+ * @param {*} seconds Seconds to add.
+ * 
+ * @returns A new Date object with seconds added to the original date.
+ */
+
 const dateWithAddedSeconds = (date,seconds) => {
     const newDate = new Date(date)
     newDate.setSeconds( new Date(date).getSeconds() + seconds )
     return newDate;
 }
+
+/**
+ * Deduct some seconds from a date and return a new date.
+ * 
+ * @param {Date} date The original date.
+ * @param {*} seconds Seconds to deduct.
+ * 
+ * @returns A new Date object with seconds deducted.
+ */
+
 const dateWithSubtractedSeconds = (date,seconds) => {
     const newDate = new Date(date)
     newDate.setSeconds( new Date(date).getSeconds() - seconds )
     return newDate;
 }
+
+/**
+ * Reducer to match events with start and stop messaages.
+ * @param {*} param0 newEvents: the newly created events, remainingMessages
+ * @param {*} e The event.
+ * @param {string} messageType start|stop  Message type 
+ * @param {*} dateConditionsVerify Function to verify date conditions.
+ */
 
 const messageReducer = ({newEvents,remainingMessages}, e, messageType, dateConditionsVerify) => {
   const oppositeMessageType = messageType === "start" ? "end" : "start"
@@ -59,10 +91,35 @@ const messageReducer = ({newEvents,remainingMessages}, e, messageType, dateCondi
 
   return( {newEvents: nextEvents, remainingMessages: remainingMessages.slice()})
 }
+
+/**
+ * Reducer to match events with start messages.
+ * @param {*} nextEventsAndMessages 
+ * @param {*} e 
+ */
 const startMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEventsAndMessages,e,"start",verifyStartMessageDateConditions)
+
+/**
+ * Reducer to match events with stop messages.
+ * @param {*} nextEventsAndMessages 
+ * @param {*} e 
+ */
 const stopMessageReducer = (nextEventsAndMessages, e) => messageReducer(nextEventsAndMessages,e,"end",verifyEndMessageDateConditions)  
 
-
+/**
+ * Create events based on movement of tracked object based on both sql data and InfluxDB time based data.
+ * 
+ * @param {*} timedata InfluxDB interface
+ * @param {*} sqldata MySQL interface
+ * @param {*} id Id for trackable object
+ * @param {*} timeZone Timezone. Standard ISO timezone string.
+ * @param {*} start A string representing the date from which to start including events.
+ * @param {*} end A string representing the date beyond which not to include events.
+ * @param {*} accEvents Include start and stop messages in events.
+ * @param {*} distance Include distance traveled in event.
+ * 
+ * @returns Promise resolving on completion.
+ */
 const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null,accEvents,distance) => {
   start = verifiedDateStringOrNull(start)
   end = verifiedDateStringOrNull(end)
@@ -136,36 +193,10 @@ const getEvents = (timedata,sqldata,id,timeZone="UTC",start=null,end=null,accEve
           unmatchedEngineRunEndMessages: eventsWithEngineStop.remainingMessages
         }
 
-        
-
         resolve(results);
-
-        // let waypointPromises = []
-        // for (const key in results.events) {
-        //   if (results.events.hasOwnProperty(key)) {
-        //     const event = results.events[key];
-        //     const promise = sqldata.get.waypoints(id,{startDate: event.start, endDate: event.end})
-        //     waypointPromises.push(promise)
-        //   }
-        // }
-
-        // Promise.all(waypointPromises)
-        //   .then( waypointSets => {
-        //     for (const key in waypointSets) {
-        //       if (waypointSets.hasOwnProperty(key)) {
-        //         const waypointSet = waypointSets[key];
-        //         results.events[key].waypoints = waypointSet
-        //       }
-        //     }
-        //     resolve(results);
-        //   })
       })
 
   }))
-
-  
-   
-  
 
 }
 

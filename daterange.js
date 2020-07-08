@@ -1,5 +1,11 @@
 const defaultTimePeriodMonths = 1
 
+/**
+ * Create a date range object from two strings containing dates.
+ * 
+ * @param {*} startDate String containing ISO formatted date. Start date of range.
+ * @param {*} endDate String containing ISO formatted date. End date of range.
+ */
 
 const dateRange = (startDate,endDate) => {
     const now = new Date()

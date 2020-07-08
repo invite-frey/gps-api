@@ -4,9 +4,23 @@ const escape = require('influx').escape
 let connection = null
 let tachometerTick = 30
 
+/**
+ * Is value numeric.
+ * @param {*} n String, integer or float.
+ * 
+ * @returns true|false True if proviced value can be converted to a float.
+ */
+
 function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   }
+
+/**
+ * Create a date compatible with InfluxDB database from an event data object.
+ * @param {*} data Object containing properties utc (time) and position_utc (date)
+ * 
+ * @returns Date object
+ */
 
 function influxDate(data){
     
@@ -24,6 +38,12 @@ function influxDate(data){
 
 }
 
+/**
+ * Connect to InfluxDB
+ * 
+ * @param {*} config Config params
+ * @param {*} dataInterval Desired time interval in seconds between speed measurements.
+ */
 const connect = (config,dataInterval=30) => {
     if(!config){
         throw "Unable to use null config for influxdb."
@@ -49,7 +69,14 @@ const connect = (config,dataInterval=30) => {
     )
 }
 
+/**
+ * Get various measurements from the database.
+ */
+
 const get = {
+    /**
+     * Get available unit ids.
+     */
     units: async () => {
         const result = await connection.query("show tag values from speed with key=unit")
         const units = []
@@ -65,6 +92,9 @@ const get = {
         }    
         return units;
     },
+    /**
+     * Get events.
+     */
     events: async (unitId,group="d",timezone="UTC",dateRange) => {
         let {startDate,endDate} = dateRange
         endDate = escape.stringLit(endDate)
@@ -76,6 +106,9 @@ const get = {
         const result = await connection.query(query)
         return result;
     },
+    /**
+     * Get distance traveled in date range.
+     */
     distance: async (unitId,timezone="UTC",dateRange) => {
         let {startDate,endDate} = dateRange
         endDate = escape.stringLit(endDate)
@@ -88,6 +121,13 @@ const get = {
         return distance;
     }
 }
+
+/**
+ * Write to InfluxDB
+ * @param {*} records Records to write.
+ * @param {*} model Model to use.
+ * @param {*} retry Number of retry attempts so far.
+ */
 
 const write = (records,model,retry) => {
     if( connection ){
@@ -131,6 +171,10 @@ const write = (records,model,retry) => {
         })
     }
 }
+
+/**
+ * Disconnect from database.
+ */
 
 const disconnect = () => {
     connection = null

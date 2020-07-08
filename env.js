@@ -1,3 +1,7 @@
+/**
+ * Mysql database params.
+ */
+
 const mysql = {
     host: process.env.DB_HOST || "localhost",
     user: process.env.DB_USER || "gps",
@@ -5,6 +9,10 @@ const mysql = {
     database: process.env.DB || "gps",
     connectionLimit: 150
 }
+
+/**
+ * InfluxDB params.
+ */
 
 const influxdb = {
     host: process.env.DB_HOST || "localhost",
