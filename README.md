@@ -13,8 +13,6 @@ A small server provider API access to location data collected by some kind of tr
 /units/:id
 
 GET
-
-
 ```
 Gets the last recorded information for unit identified by 'id'.
 
