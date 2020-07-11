@@ -1,6 +1,6 @@
 # API Server for Location Data
 
-A small server provider API access to location data collected by some kind of tracking device. The API utilizes both MySQL and InfluxDB data to compile event data from tracking data points.
+A small server provider API access to location data collected by some kind of tracking device. The API utilizes both MySQL and InfluxDB data to compile event data from tracking data points. Intended to be used together with [gps-server](https://github.com/invite-frey/gps-server.git), but can be backed by any source as long as the MySQL database has a compatible schema.
 
 ### Prerequisites
 
@@ -37,8 +37,8 @@ $ mysql -u youruser -p gps < db_schema.sql
 #### If you are using daemontools:
 
 * The service directory is provided as an example.
-* Clone the directory into your desired location (do not link the service directory in the git repo directly to prevent confidential information being committed back into your repo).
-* Make the required changes to the service/env directory and make sure the paths to your app installation in the run file is correct.
+* Clone the service directory into your desired location (do not link the service directory in the git repo directly to daemontools to prevent confidential information being committed back into your repo).
+* Make the required changes to the service/env files and make sure the path to your app installation in the run file is correct.
 * Link the cloned service directory to your system's service directory watched by daemontools. 
 
 ### Endpoints
