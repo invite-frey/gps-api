@@ -8,11 +8,11 @@ A small server prividing API access to location data collected by some kind of t
 * MySQL and InfluxDB databases containing data collected from a tracker. See the the [gps-server](https://github.com/invite-frey/gps-server.git) for an example of a server collecting tracking data from Xexun trackers.
 
 ### Installation
-
+  
 #### Get the files
 
 ```
-$ wget https://github.com/invite-frey/gps-api.git
+$ git clone https://github.com/invite-frey/gps-api.git
 ```
 Move the gps-server directory to your desired location, for example /var/apps
 
