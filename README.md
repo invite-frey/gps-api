@@ -1,6 +1,6 @@
 # API Server for Location Data
 
-A small server provider API access to location data collected by some kind of tracking device. The API utilizes both MySQL and InfluxDB data to compile event data from tracking data points. Intended to be used together with [gps-server](https://github.com/invite-frey/gps-server.git), but can be backed by any source as long as the MySQL database has a compatible schema.
+A small server prividing API access to location data collected by some kind of tracking device. The API utilizes both MySQL and InfluxDB data to compile event data from tracking data points. Intended to be used together with [gps-server](https://github.com/invite-frey/gps-server.git), but can be backed by any source as long as the MySQL database has a compatible schema.
 
 ### Prerequisites
 
