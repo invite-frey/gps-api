@@ -1,0 +1,2 @@
+#!/bin/sh 
+exec /usr/bin/multilog t /var/log/gps-api

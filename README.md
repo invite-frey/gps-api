@@ -7,6 +7,40 @@ A small server provider API access to location data collected by some kind of tr
 * [NodeJS](https://nodejs.org/en/)
 * MySQL and InfluxDB databases containing data collected from a tracker. See the the [gps-server](https://github.com/invite-frey/gps-server.git) for an example of a server collecting tracking data from Xexun trackers.
 
+### Installation
+
+#### Get the files
+
+```
+$ wget https://github.com/invite-frey/gps-api.git
+```
+Move the gps-server directory to your desired location, for example /var/apps
+
+#### Setup a MySQL Database
+
+Create a MySQL database, if one does not already exist.
+
+The schema is the same used in the [gps-server/db_schema.sql](https://github.com/invite-frey/gps-server/blob/master/db_schema.sql)
+
+```
+$ mysql -u youruser -p
+mysql> CREATE DATABASE gps;
+mysql> GRANT ALL PRIVILEGES ON gps.* to yourdbuser@localhost IDENTIFIED BY 'yoursecretpassword';
+mysql> FLUSH PRIVILEGES;
+mysql> exit
+```
+
+```
+$ mysql -u youruser -p gps < db_schema.sql
+```
+
+#### If you are using daemontools:
+
+* The service directory is provided as an example.
+* Clone the directory into your desired location (do not link the service directory in the git repo directly to prevent confidential information being committed back into your repo).
+* Make the required changes to the service/env directory and make sure the paths to your app installation in the run file is correct.
+* Link the cloned service directory to your system's service directory watched by daemontools. 
+
 ### Endpoints
 
 ```
