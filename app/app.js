@@ -79,6 +79,28 @@ app.get('/units/:id', async (req, res) => {
 });
 
 /**
+ * Endpoint: gets the FIRST recorded information for unit identified by 'id'
+ */
+app.get('/units/:id/first', async (req, res) => {
+  try{
+    const id = req.params.id
+    if(verifyUnitId(id)){
+      const unitData = await mysql.get.unit(id,false)
+      if(unitData.length===1){
+        return res.json(unitData[0])
+      }else{
+        return res.status(400).send(new Error("Ambiguous unit id."))
+      }
+    }else{
+      return res.status(400).send(new Error("Invalid id."))
+    }
+  }catch(error){
+    console.log(error)
+    return res.status(500).send(error.message)
+  }
+});
+
+/**
  * Endpoint: Gets events for unit identified by 'id'. Expects a POST object in the form of an array containing time ranges to search in.
  * All times are expected to be UTC.
  * 
